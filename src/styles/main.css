@@ -190,15 +190,15 @@ html, body {
 }
 
 /* Focus guides - subtle lines marking ORP position */
+/* Focus guides - positioned relative to word-display for proper centering */
 #focus-line {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   pointer-events: none;
   z-index: 1;
-  /* Use font-size for scaling calculations */
   font-size: var(--font-size-word);
 }
 
@@ -224,10 +224,10 @@ html, body {
   background-color: #333;
 }
 
-/* Vertical tick marks at center of ORP slot (0.6em wide, extends left from 50%, so center is -0.3em) */
-#reader-screen::before {
+/* Vertical tick marks - positioned relative to word-display */
+#word-display::before {
   content: '';
-  position: fixed;
+  position: absolute;
   left: calc(50% - 0.3em);
   top: calc(50% - 1.3em);
   width: 1px;
@@ -239,9 +239,9 @@ html, body {
   font-size: var(--font-size-word);
 }
 
-#reader-screen::after {
+#word-display::after {
   content: '';
-  position: fixed;
+  position: absolute;
   left: calc(50% - 0.3em);
   top: calc(50% + 0.8em);
   width: 1px;
@@ -549,10 +549,10 @@ kbd {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(26, 26, 46, 0.95) 0%, transparent 100%);
-    padding: 1rem 1.5rem;
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
-    gap: 1rem;
+    background: rgba(26, 26, 46, 0.95);
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
+    gap: 0.5rem;
     z-index: 100;
     transform: translateY(0);
     transition: transform 0.3s ease, opacity 0.3s ease;
@@ -570,7 +570,46 @@ kbd {
   }
 
   #reader-screen {
-    padding-bottom: 100px;
+    padding-bottom: 90px;
+  }
+
+  /* Prevent long words from overflowing */
+  #word-display {
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  #current-word {
+    max-width: 95vw;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (pointer: coarse) and (orientation: landscape), (max-height: 500px) {
+  .mobile-toolbar {
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0.5rem 1rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .toolbar-row {
+    gap: 1rem;
+  }
+
+  .toolbar-row.secondary {
+    gap: 0.75rem;
+  }
+
+  .toolbar-btn.primary-action {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  #reader-screen {
+    padding-bottom: 70px;
   }
 }
 

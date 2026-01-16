@@ -39,14 +39,9 @@ export function initMobileControls({ toolbar, reader }) {
   toolbarEl = toolbar;
   readerEl = reader;
 
-  // Tap on reader area toggles toolbar visibility
+  // Tap anywhere on reader toggles toolbar visibility (except toolbar itself)
   reader.addEventListener('click', (e) => {
-    // Don't toggle if clicking on toolbar, status bar, or word display
-    if (
-      toolbar.contains(e.target) ||
-      e.target.closest('#status-bar') ||
-      e.target.closest('#word-display')
-    ) {
+    if (toolbar.contains(e.target)) {
       return;
     }
     toggleVisibility();
