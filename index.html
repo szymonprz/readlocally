@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Reader</title>
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Landing Screen -->
+    <div id="landing-screen" class="screen">
+      <h1>RSVP Reader</h1>
+      <p class="subtitle">Speed reading with Rapid Serial Visual Presentation</p>
+
+      <div id="drop-zone">
+        <div class="drop-zone-content">
+          <p class="drop-text">Drop EPUB file here</p>
+          <p class="drop-or">or</p>
+          <button id="file-picker-btn" type="button">Choose File</button>
+          <input type="file" id="file-input" accept=".epub" hidden>
+        </div>
+      </div>
+
+      <p class="hint">Only EPUB files are supported</p>
+    </div>
+
+    <!-- Book Info Screen -->
+    <div id="book-info-screen" class="screen hidden">
+      <div id="book-info">
+        <div id="cover-container">
+          <img id="book-cover" src="" alt="Book cover">
+          <div id="cover-placeholder">No Cover</div>
+        </div>
+        <h2 id="book-title">Book Title</h2>
+        <p id="book-author">Author Name</p>
+        <p id="book-stats"></p>
+
+        <!-- File selection hint (shown when file isn't cached/available) -->
+        <div id="file-hint" class="hidden">
+          <p class="hint-text">To resume, select or drop the same file:</p>
+          <div id="book-info-drop-zone" class="mini-drop-zone">
+            <p>Drop EPUB here</p>
+            <span class="drop-or">or</span>
+            <button id="book-info-file-btn" type="button" class="secondary">Select File</button>
+          </div>
+        </div>
+
+        <div id="book-actions">
+          <button id="start-reading-btn" type="button">Start Reading</button>
+          <button id="choose-different-btn" type="button" class="secondary">Choose Different Book</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reader Screen -->
+    <div id="reader-screen" class="screen hidden">
+      <div id="word-display">
+        <span id="prev-word" class="peripheral-word"></span>
+        <div id="current-word">
+          <div id="word-left"><span id="word-before"></span><span id="word-orp"></span></div>
+          <div id="word-right"><span id="word-after"></span></div>
+        </div>
+        <span id="next-word" class="peripheral-word"></span>
+      </div>
+
+      <div id="focus-line"></div>
+
+      <div id="chapter-indicator" class="hidden">
+        <span id="chapter-title"></span>
+      </div>
+
+      <div id="status-bar">
+        <span id="status-indicator">Paused</span>
+        <span id="wpm-display">300 WPM</span>
+        <span id="chunk-display">1 word</span>
+        <span id="progress-display">0%</span>
+      </div>
+
+      <div id="controls-hint">
+        <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>P</kbd> preview | <kbd>Esc</kbd> menu
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

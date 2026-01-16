@@ -1,0 +1,26 @@
+{
+  "name": "readlocally",
+  "version": "1.0.0",
+  "description": "RSVP Reader - Browser-based EPUB reader with Rapid Serial Visual Presentation",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "epub",
+    "reader",
+    "rsvp",
+    "speed-reading"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource-variable/literata": "^5.2.8",
+    "@fontsource-variable/source-serif-4": "^5.2.9",
+    "@fontsource/merriweather": "^5.2.11",
+    "jszip": "^3.10.1",
+    "vite": "^7.3.1"
+  }
+}

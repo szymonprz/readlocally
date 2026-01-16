@@ -1,0 +1,532 @@
+/* CSS Custom Properties for Theming */
+:root {
+  --bg-color: #1a1a2e;
+  --text-color: #eaeaea;
+  --accent-color: #e94560;
+  --orp-color: #e94560;
+  --peripheral-color: #444;
+  --muted-color: #666;
+  --surface-color: #16213e;
+  --border-color: #0f3460;
+
+  --font-size-word: 3rem;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-reading: 'Literata Variable', Georgia, serif;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base Styles */
+html, body {
+  height: 100%;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Landing Screen */
+#landing-screen h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+
+#landing-screen .subtitle {
+  color: var(--muted-color);
+  margin-bottom: 3rem;
+}
+
+#drop-zone {
+  width: 100%;
+  max-width: 400px;
+  padding: 3rem 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: var(--accent-color);
+  background-color: var(--surface-color);
+}
+
+.drop-text {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.drop-or {
+  color: var(--muted-color);
+  margin: 1rem 0;
+}
+
+#file-picker-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#file-picker-btn:hover {
+  opacity: 0.9;
+}
+
+#landing-screen .hint {
+  margin-top: 2rem;
+  color: var(--muted-color);
+  font-size: 0.875rem;
+}
+
+/* Reader Screen */
+#reader-screen {
+  position: relative;
+}
+
+#word-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+}
+
+/*
+ * ORP Fixed Position Layout - Two Container Split
+ * Left container ends at screen center (right: 50%), right container starts at screen center (left: 50%).
+ * The ORP character sits at the boundary - always at exact screen center with no JS measurement.
+ */
+#current-word {
+  font-size: var(--font-size-word);
+  font-weight: 400;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  font-family: var(--font-family-reading);
+  letter-spacing: 0.01em;
+}
+
+#word-left {
+  position: absolute;
+  right: 50%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#word-right {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#word-before {
+  /* Text before ORP - part of left container */
+}
+
+/* ORP Highlighting - this character is the anchor point at screen center */
+#word-orp {
+  color: var(--orp-color);
+  display: inline-block;
+  min-width: 0.6em;
+  text-align: center;
+}
+
+#word-after {
+  /* Text after ORP - in right container */
+}
+
+/* Chunk mode - when displaying multiple words, center without ORP split */
+#current-word.chunk-mode #word-left {
+  display: none;
+}
+
+#current-word.chunk-mode #word-right {
+  position: static;
+  text-align: center;
+}
+
+#current-word.chunk-mode #word-after {
+  color: var(--text-color);
+}
+
+/* Focus guides - subtle lines marking ORP position */
+#focus-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  /* Use font-size for scaling calculations */
+  font-size: var(--font-size-word);
+}
+
+/* Top horizontal line */
+#focus-line::before {
+  content: '';
+  position: absolute;
+  top: calc(50% - 1.3em);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #333;
+}
+
+/* Bottom horizontal line */
+#focus-line::after {
+  content: '';
+  position: absolute;
+  top: calc(50% + 1.3em);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #333;
+}
+
+/* Vertical tick marks at center of ORP slot (0.6em wide, extends left from 50%, so center is -0.3em) */
+#reader-screen::before {
+  content: '';
+  position: fixed;
+  left: calc(50% - 0.3em);
+  top: calc(50% - 1.3em);
+  width: 1px;
+  height: 0.5em;
+  background-color: #333;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 2;
+  font-size: var(--font-size-word);
+}
+
+#reader-screen::after {
+  content: '';
+  position: fixed;
+  left: calc(50% - 0.3em);
+  top: calc(50% + 0.8em);
+  width: 1px;
+  height: 0.5em;
+  background-color: #333;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 2;
+  font-size: var(--font-size-word);
+}
+
+/* Peripheral Preview Words */
+.peripheral-word {
+  position: absolute;
+  font-size: calc(var(--font-size-word) * 0.5);
+  color: var(--peripheral-color);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-family: var(--font-family-reading);
+}
+
+.peripheral-word.visible {
+  opacity: 0.4;
+}
+
+#prev-word {
+  right: calc(50% + 15ch);
+  text-align: right;
+}
+
+#next-word {
+  left: calc(50% + 15ch);
+  text-align: left;
+}
+
+/* Chunk display - multiple words */
+#current-word.chunk #word-after {
+  white-space: nowrap;
+}
+
+#status-bar {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2rem;
+  font-size: 0.875rem;
+  color: var(--muted-color);
+}
+
+#status-indicator {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background-color: var(--surface-color);
+}
+
+#status-indicator.playing {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+#controls-hint {
+  position: fixed;
+  bottom: 2rem;
+  color: var(--muted-color);
+  font-size: 0.875rem;
+}
+
+kbd {
+  padding: 0.2rem 0.5rem;
+  background-color: var(--surface-color);
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Book Info Screen */
+#book-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+}
+
+#cover-container {
+  width: 180px;
+  height: 270px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  background-color: var(--surface-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+#book-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#book-cover[src=""],
+#book-cover:not([src]) {
+  display: none;
+}
+
+#cover-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-color);
+  font-size: 0.875rem;
+}
+
+#book-cover:not([src=""]) + #cover-placeholder {
+  display: none;
+}
+
+#book-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+#book-author {
+  color: var(--muted-color);
+  margin-bottom: 0.5rem;
+}
+
+#book-stats {
+  color: var(--muted-color);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+}
+
+#book-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+#start-reading-btn {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#start-reading-btn:hover {
+  opacity: 0.9;
+}
+
+#choose-different-btn {
+  padding: 0.75rem 2rem;
+  font-size: 0.875rem;
+  background-color: transparent;
+  color: var(--muted-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#choose-different-btn:hover {
+  border-color: var(--text-color);
+  color: var(--text-color);
+}
+
+/* Disabled button state */
+#start-reading-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#start-reading-btn:disabled:hover {
+  opacity: 0.5;
+}
+
+/* File hint section on book info screen */
+#file-hint {
+  margin: 1.5rem 0;
+  text-align: center;
+  width: 100%;
+}
+
+#file-hint .hint-text {
+  color: var(--muted-color);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Mini drop zone for book info screen */
+.mini-drop-zone {
+  padding: 1.5rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.mini-drop-zone:hover,
+.mini-drop-zone.drag-over {
+  border-color: var(--accent-color);
+  background-color: var(--surface-color);
+}
+
+.mini-drop-zone p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.mini-drop-zone .drop-or {
+  color: var(--muted-color);
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+  display: block;
+}
+
+#book-info-file-btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  background-color: transparent;
+  color: var(--muted-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#book-info-file-btn:hover {
+  border-color: var(--text-color);
+  color: var(--text-color);
+}
+
+/* Chapter Indicator */
+#chapter-indicator {
+  position: fixed;
+  top: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 2rem;
+  background-color: var(--surface-color);
+  border-radius: 8px;
+  font-size: 1.25rem;
+  z-index: 10;
+  animation: fadeInOut 2s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Loading State */
+.loading #drop-zone {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--muted-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
