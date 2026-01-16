@@ -297,14 +297,7 @@ html, body {
 }
 
 #status-indicator {
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  background-color: var(--surface-color);
-}
-
-#status-indicator.playing {
-  background-color: var(--accent-color);
-  color: white;
+  color: var(--muted-color);
 }
 
 #controls-hint {
