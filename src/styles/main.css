@@ -650,3 +650,94 @@ kbd {
 .toolbar-btn.active {
   color: var(--accent-color);
 }
+
+/* ===========================================
+   Overlay and Modal Styles
+   =========================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.chapter-list-modal {
+  position: relative;
+  background: var(--surface-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.chapter-list-modal h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+#chapter-list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+}
+
+#chapter-list li {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+#chapter-list li:hover {
+  background-color: var(--border-color);
+}
+
+#chapter-list li.current {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+#chapter-list li .chapter-progress {
+  font-size: 0.8rem;
+  color: var(--muted-color);
+  margin-left: 0.5rem;
+}
+
+#chapter-list li.current .chapter-progress {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.close-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  background-color: transparent;
+  color: var(--muted-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  border-color: var(--text-color);
+  color: var(--text-color);
+}

@@ -21,6 +21,7 @@ import {
   savePreferences,
   getPreferences,
   clearBookData,
+  clearReadingPosition,
   isMatchingSavedBook,
 } from './services/storage.js';
 import {
@@ -39,6 +40,11 @@ import {
   initMobileControls,
   setPlayingState,
 } from './services/mobile-controls.js';
+import {
+  applyTheme,
+  getNextThemeId,
+  getThemeName,
+} from './services/theme.js';
 
 // Font configuration - open source fonts optimized for reading (self-hosted via Fontsource)
 const READING_FONTS = {
@@ -78,6 +84,7 @@ let currentFileHandle = null;
 let preferences = getPreferences();
 let lastPositionSaveTime = 0;
 let mobileControlsInitialized = false;
+let isResumingBook = false; // Track if we're resuming a previous book
 
 // DOM Elements
 const landingScreen = document.getElementById('landing-screen');
@@ -112,6 +119,11 @@ const chooseDifferentBtn = document.getElementById('choose-different-btn');
 const bookInfoDropZone = document.getElementById('book-info-drop-zone');
 const bookInfoFileBtn = document.getElementById('book-info-file-btn');
 
+// Chapter list overlay elements
+const chapterListOverlay = document.getElementById('chapter-list-overlay');
+const chapterListEl = document.getElementById('chapter-list');
+const closeChapterListBtn = document.getElementById('close-chapter-list');
+
 // Mobile toolbar elements
 const mobileToolbar = document.getElementById('mobile-toolbar');
 const btnPlayPause = document.getElementById('btn-play-pause');
@@ -131,8 +143,9 @@ const chunkIcon = document.getElementById('chunk-icon');
  * Initialize the application
  */
 async function init() {
-  // Apply saved font preferences
+  // Apply saved preferences
   applyFontPreferences();
+  applyThemePreferences();
 
   // Set up file handling with handle support
   initFileHandler({
@@ -170,6 +183,17 @@ async function init() {
 
   // Set up keyboard controls
   document.addEventListener('keydown', handleKeydown);
+
+  // Set up chapter list overlay controls
+  if (closeChapterListBtn) {
+    closeChapterListBtn.addEventListener('click', hideChapterListOverlay);
+  }
+  if (chapterListOverlay) {
+    const backdrop = chapterListOverlay.querySelector('.overlay-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', hideChapterListOverlay);
+    }
+  }
 
   // Save position when page is closed
   window.addEventListener('beforeunload', () => {
@@ -282,6 +306,7 @@ async function handleReloadSavedFile() {
         currentFile = file;
         bookData = await parseEpub(file);
         tokens = tokenizeChapters(bookData.chapters);
+        isResumingBook = true; // Mark as resume
 
         // Start reading immediately
         startReading();
@@ -326,6 +351,14 @@ async function handleFile(file, handle = null) {
     console.log('Tokens generated:', tokens.length);
 
     const isResume = isMatchingSavedBook(file);
+    isResumingBook = isResume;
+
+    // Clear old position data when loading a new book
+    if (!isResume) {
+      clearBookData();
+      clearReadingPosition(); // Explicit double-clear for safety
+    }
+
     saveBookReference(bookData, file);
 
     // Save file access for future reloads
@@ -409,15 +442,16 @@ function startReading() {
     onEnd: handleEnd,
   });
 
-  const isResume = isMatchingSavedBook(currentFile);
-  if (isResume) {
+  // Restore position only if resuming the same book
+  if (isResumingBook) {
     const savedPosition = getReadingPosition();
-    if (savedPosition && savedPosition.wordIndex > 0) {
+    if (
+      savedPosition &&
+      savedPosition.wordIndex > 0 &&
+      savedPosition.wordIndex < tokens.length
+    ) {
       engine.seekTo(savedPosition.wordIndex);
     }
-  } else {
-    clearBookData();
-    saveBookReference(bookData, currentFile);
   }
 
   updateWpmDisplay(preferences.wpm);
@@ -642,6 +676,26 @@ function handleKeydown(event) {
       cycleReadingFont();
       break;
 
+    case 'KeyT':
+      event.preventDefault();
+      cycleTheme();
+      break;
+
+    case 'KeyC':
+      event.preventDefault();
+      toggleChapterListOverlay();
+      break;
+
+    case 'BracketLeft': // [
+      event.preventDefault();
+      goToPreviousChapter();
+      break;
+
+    case 'BracketRight': // ]
+      event.preventDefault();
+      goToNextChapter();
+      break;
+
     case 'KeyJ':
       event.preventDefault();
       stepBackward();
@@ -666,8 +720,13 @@ function handleKeydown(event) {
 
     case 'Escape':
       event.preventDefault();
-      engine?.pause();
-      showBookInfoScreen();
+      // Close chapter list overlay if visible, otherwise go to menu
+      if (!chapterListOverlay?.classList.contains('hidden')) {
+        hideChapterListOverlay();
+      } else {
+        engine?.pause();
+        showBookInfoScreen();
+      }
       break;
   }
 }
@@ -803,6 +862,146 @@ function applyFontPreferences() {
   // Apply saved font size
   if (preferences.fontSize) {
     document.documentElement.style.setProperty('--font-size-word', `${preferences.fontSize}rem`);
+  }
+}
+
+/**
+ * Apply saved theme preferences on startup
+ */
+function applyThemePreferences() {
+  const themeId = preferences.theme || 'dark';
+  applyTheme(themeId);
+}
+
+/**
+ * Cycle to the next theme
+ */
+function cycleTheme() {
+  const currentTheme = preferences.theme || 'dark';
+  const nextTheme = getNextThemeId(currentTheme);
+
+  applyTheme(nextTheme);
+  preferences.theme = nextTheme;
+  savePreferences({ theme: nextTheme });
+
+  showTemporaryNotification(`Theme: ${getThemeName(nextTheme)}`);
+}
+
+/**
+ * Navigate to previous chapter
+ */
+function goToPreviousChapter() {
+  if (!engine || !tokens || !bookData) return;
+
+  const currentIndex = engine.getCurrentIndex();
+  const currentChapter = tokens[currentIndex].chapterIndex;
+
+  if (currentChapter > 0) {
+    const targetChapter = currentChapter - 1;
+    const chapterStart = tokens.findIndex((t) => t.chapterIndex === targetChapter);
+    if (chapterStart >= 0) {
+      engine.seekTo(chapterStart);
+      showChapterIndicator(bookData.chapters[targetChapter].title);
+    }
+  } else {
+    // Already at first chapter, go to beginning
+    engine.seekTo(0);
+    showTemporaryNotification('Beginning of book');
+  }
+}
+
+/**
+ * Navigate to next chapter
+ */
+function goToNextChapter() {
+  if (!engine || !tokens || !bookData) return;
+
+  const currentIndex = engine.getCurrentIndex();
+  const currentChapter = tokens[currentIndex].chapterIndex;
+
+  if (currentChapter < bookData.chapters.length - 1) {
+    const targetChapter = currentChapter + 1;
+    const chapterStart = tokens.findIndex((t) => t.chapterIndex === targetChapter);
+    if (chapterStart >= 0) {
+      engine.seekTo(chapterStart);
+      showChapterIndicator(bookData.chapters[targetChapter].title);
+    }
+  } else {
+    showTemporaryNotification('Last chapter');
+  }
+}
+
+/**
+ * Navigate to a specific chapter by index
+ * @param {number} chapterIndex - Chapter index to navigate to
+ */
+function goToChapter(chapterIndex) {
+  if (!engine || !tokens || !bookData) return;
+  if (chapterIndex < 0 || chapterIndex >= bookData.chapters.length) return;
+
+  const chapterStart = tokens.findIndex((t) => t.chapterIndex === chapterIndex);
+  if (chapterStart >= 0) {
+    engine.seekTo(chapterStart);
+    showChapterIndicator(bookData.chapters[chapterIndex].title);
+  }
+}
+
+/**
+ * Show chapter list overlay
+ */
+function showChapterListOverlay() {
+  if (!bookData || !chapterListOverlay || !chapterListEl) return;
+
+  engine?.pause();
+
+  // Get current chapter index
+  const currentIndex = engine ? engine.getCurrentIndex() : 0;
+  const currentChapter = tokens && tokens[currentIndex] ? tokens[currentIndex].chapterIndex : 0;
+
+  // Populate chapter list
+  chapterListEl.innerHTML = '';
+  bookData.chapters.forEach((chapter, index) => {
+    const li = document.createElement('li');
+    li.textContent = chapter.title || `Chapter ${index + 1}`;
+
+    if (index === currentChapter) {
+      li.classList.add('current');
+    }
+
+    li.addEventListener('click', () => {
+      goToChapter(index);
+      hideChapterListOverlay();
+    });
+
+    chapterListEl.appendChild(li);
+  });
+
+  // Scroll to current chapter
+  const currentItem = chapterListEl.querySelector('.current');
+  if (currentItem) {
+    currentItem.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }
+
+  chapterListOverlay.classList.remove('hidden');
+}
+
+/**
+ * Hide chapter list overlay
+ */
+function hideChapterListOverlay() {
+  if (chapterListOverlay) {
+    chapterListOverlay.classList.add('hidden');
+  }
+}
+
+/**
+ * Toggle chapter list overlay
+ */
+function toggleChapterListOverlay() {
+  if (chapterListOverlay?.classList.contains('hidden')) {
+    showChapterListOverlay();
+  } else {
+    hideChapterListOverlay();
   }
 }
 

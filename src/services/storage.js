@@ -133,6 +133,17 @@ export function clearBookData() {
 }
 
 /**
+ * Clear just the reading position (used when starting fresh)
+ */
+export function clearReadingPosition() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.READING_POSITION);
+  } catch (e) {
+    console.warn('Failed to clear reading position:', e);
+  }
+}
+
+/**
  * Clear all stored data
  */
 export function clearAllData() {

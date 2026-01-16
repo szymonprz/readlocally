@@ -75,7 +75,17 @@
       </div>
 
       <div id="controls-hint">
-        <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>Esc</kbd> menu
+        <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>T</kbd> theme | <kbd>[ ]</kbd> chapters | <kbd>Esc</kbd> menu
+      </div>
+
+      <!-- Chapter List Overlay -->
+      <div id="chapter-list-overlay" class="overlay hidden">
+        <div class="overlay-backdrop"></div>
+        <div class="chapter-list-modal">
+          <h2>Chapters</h2>
+          <ul id="chapter-list"></ul>
+          <button id="close-chapter-list" class="close-btn">Close (C)</button>
+        </div>
       </div>
 
       <!-- Mobile Touch Controls -->
