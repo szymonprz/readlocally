@@ -29,6 +29,16 @@ import {
   checkSavedFileStatus,
   clearSavedFile,
 } from './services/file-persistence.js';
+import {
+  acquireWakeLock,
+  releaseWakeLock,
+  setupVisibilityHandler,
+} from './services/wake-lock.js';
+import {
+  isMobileDevice,
+  initMobileControls,
+  setPlayingState,
+} from './services/mobile-controls.js';
 
 // Font configuration - open source fonts optimized for reading (self-hosted via Fontsource)
 const READING_FONTS = {
@@ -68,6 +78,7 @@ let currentFileHandle = null;
 let preferences = getPreferences();
 let showPeripheralPreview = preferences.showPeripheralPreview || false;
 let lastPositionSaveTime = 0;
+let mobileControlsInitialized = false;
 
 // DOM Elements
 const landingScreen = document.getElementById('landing-screen');
@@ -103,6 +114,23 @@ const chooseDifferentBtn = document.getElementById('choose-different-btn');
 // Book info fallback file selection elements
 const bookInfoDropZone = document.getElementById('book-info-drop-zone');
 const bookInfoFileBtn = document.getElementById('book-info-file-btn');
+
+// Mobile toolbar elements
+const mobileToolbar = document.getElementById('mobile-toolbar');
+const btnPlayPause = document.getElementById('btn-play-pause');
+const btnSpeedUp = document.getElementById('btn-speed-up');
+const btnSpeedDown = document.getElementById('btn-speed-down');
+const btnStepBack = document.getElementById('btn-step-back');
+const btnStepForward = document.getElementById('btn-step-forward');
+const btnChunkCycle = document.getElementById('btn-chunk-cycle');
+const btnFontUp = document.getElementById('btn-font-up');
+const btnFontDown = document.getElementById('btn-font-down');
+const btnFontCycle = document.getElementById('btn-font-cycle');
+const btnPreviewToggle = document.getElementById('btn-preview-toggle');
+const btnMenu = document.getElementById('btn-menu');
+const playPauseIcon = document.getElementById('play-pause-icon');
+const chunkIcon = document.getElementById('chunk-icon');
+const previewIcon = document.getElementById('preview-icon');
 
 /**
  * Initialize the application
@@ -404,6 +432,10 @@ function startReading() {
   statusIndicator.classList.remove('playing');
 
   showReaderScreen();
+
+  // Initialize mobile controls when entering reader
+  initMobileToolbar();
+  updateMobileUI();
 }
 
 /**
@@ -490,9 +522,28 @@ function handleStateChange(isPlaying) {
   if (isPlaying) {
     statusIndicator.textContent = 'Playing';
     statusIndicator.classList.add('playing');
+
+    // Mobile: update UI and acquire wake lock
+    if (isMobileDevice()) {
+      if (playPauseIcon) playPauseIcon.textContent = '⏸';
+      btnPlayPause?.classList.add('playing');
+      setPlayingState(true);
+      acquireWakeLock();
+    }
   } else {
     statusIndicator.textContent = 'Paused';
     statusIndicator.classList.remove('playing');
+
+    // Mobile: update UI and release wake lock
+    if (isMobileDevice()) {
+      if (playPauseIcon) playPauseIcon.textContent = '▶';
+      btnPlayPause?.classList.remove('playing');
+      setPlayingState(false);
+      releaseWakeLock();
+    }
+
+    // Update step button states (only enabled when paused)
+    updateStepButtonStates();
 
     if (engine) {
       const index = engine.getCurrentIndex();
@@ -798,6 +849,129 @@ function applyFontPreferences() {
 }
 
 /**
+ * Initialize mobile toolbar controls
+ */
+function initMobileToolbar() {
+  if (!isMobileDevice() || mobileControlsInitialized) return;
+
+  mobileControlsInitialized = true;
+
+  // Initialize visibility management
+  initMobileControls({
+    toolbar: mobileToolbar,
+    reader: readerScreen,
+  });
+
+  // Setup wake lock visibility handler
+  setupVisibilityHandler(() => engine?.getIsPlaying() || false);
+
+  // Play/Pause
+  btnPlayPause?.addEventListener('click', () => {
+    engine?.toggle();
+  });
+
+  // Speed controls
+  btnSpeedUp?.addEventListener('click', () => {
+    if (engine) {
+      const newWpm = engine.setWpm(engine.getWpm() + 25);
+      updateWpmDisplay(newWpm);
+      preferences.wpm = newWpm;
+      savePreferences({ wpm: newWpm });
+    }
+  });
+
+  btnSpeedDown?.addEventListener('click', () => {
+    if (engine) {
+      const newWpm = engine.setWpm(engine.getWpm() - 25);
+      updateWpmDisplay(newWpm);
+      preferences.wpm = newWpm;
+      savePreferences({ wpm: newWpm });
+    }
+  });
+
+  // Step controls
+  btnStepBack?.addEventListener('click', stepBackward);
+  btnStepForward?.addEventListener('click', stepForward);
+
+  // Chunk size cycle (1 -> 2 -> 3 -> 4 -> 5 -> 1)
+  btnChunkCycle?.addEventListener('click', () => {
+    if (engine) {
+      const currentSize = engine.getChunkSize();
+      const newSize = currentSize >= 5 ? 1 : currentSize + 1;
+      const actualSize = engine.setChunkSize(newSize);
+      updateChunkDisplay(actualSize);
+      updateChunkIcon(actualSize);
+      preferences.chunkSize = actualSize;
+      savePreferences({ chunkSize: actualSize });
+    }
+  });
+
+  // Font size controls
+  btnFontUp?.addEventListener('click', increaseFontSize);
+  btnFontDown?.addEventListener('click', decreaseFontSize);
+
+  // Font cycle
+  btnFontCycle?.addEventListener('click', cycleReadingFont);
+
+  // Peripheral preview toggle
+  btnPreviewToggle?.addEventListener('click', () => {
+    togglePeripheralPreview();
+    updatePreviewIcon();
+  });
+
+  // Menu/back button
+  btnMenu?.addEventListener('click', () => {
+    engine?.pause();
+    showBookInfoScreen();
+  });
+}
+
+/**
+ * Update mobile UI elements to reflect current state
+ */
+function updateMobileUI() {
+  if (!isMobileDevice()) return;
+
+  // Update chunk icon
+  updateChunkIcon(preferences.chunkSize || 1);
+
+  // Update preview icon
+  updatePreviewIcon();
+
+  // Update step button states
+  updateStepButtonStates();
+}
+
+/**
+ * Update preview icon based on current state
+ */
+function updatePreviewIcon() {
+  if (previewIcon) {
+    previewIcon.textContent = showPeripheralPreview ? '◉' : '◯';
+    btnPreviewToggle?.classList.toggle('active', showPeripheralPreview);
+  }
+}
+
+/**
+ * Update chunk icon
+ * @param {number} size - Current chunk size
+ */
+function updateChunkIcon(size) {
+  if (chunkIcon) {
+    chunkIcon.textContent = size.toString();
+  }
+}
+
+/**
+ * Update step button enabled/disabled state
+ */
+function updateStepButtonStates() {
+  const isPaused = engine && !engine.getIsPlaying();
+  if (btnStepBack) btnStepBack.disabled = !isPaused;
+  if (btnStepForward) btnStepForward.disabled = !isPaused;
+}
+
+/**
  * Show the landing screen
  */
 function showLandingScreen() {
@@ -813,6 +987,9 @@ function showBookInfoScreen() {
   landingScreen.classList.add('hidden');
   bookInfoScreen.classList.remove('hidden');
   readerScreen.classList.add('hidden');
+
+  // Release wake lock when leaving reader
+  releaseWakeLock();
 }
 
 /**

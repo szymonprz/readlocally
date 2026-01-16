@@ -80,6 +80,27 @@
       <div id="controls-hint">
         <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>P</kbd> preview | <kbd>Esc</kbd> menu
       </div>
+
+      <!-- Mobile Touch Controls -->
+      <div id="mobile-toolbar" class="mobile-toolbar">
+        <div class="toolbar-row">
+          <button class="toolbar-btn" id="btn-speed-down" aria-label="Slower">−</button>
+          <button class="toolbar-btn" id="btn-step-back" aria-label="Back" disabled>⏮</button>
+          <button class="toolbar-btn primary-action" id="btn-play-pause" aria-label="Play/Pause">
+            <span id="play-pause-icon">▶</span>
+          </button>
+          <button class="toolbar-btn" id="btn-step-forward" aria-label="Next" disabled>⏭</button>
+          <button class="toolbar-btn" id="btn-speed-up" aria-label="Faster">+</button>
+        </div>
+        <div class="toolbar-row secondary">
+          <button class="toolbar-btn" id="btn-chunk-cycle" aria-label="Chunk size"><span id="chunk-icon">1</span></button>
+          <button class="toolbar-btn" id="btn-font-down" aria-label="Smaller text">A↓</button>
+          <button class="toolbar-btn" id="btn-font-up" aria-label="Larger text">A↑</button>
+          <button class="toolbar-btn" id="btn-font-cycle" aria-label="Font">Aa</button>
+          <button class="toolbar-btn" id="btn-preview-toggle" aria-label="Preview"><span id="preview-icon">◯</span></button>
+          <button class="toolbar-btn" id="btn-menu" aria-label="Menu">✕</button>
+        </div>
+      </div>
     </div>
   </div>
 

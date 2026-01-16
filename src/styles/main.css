@@ -530,3 +530,119 @@ kbd {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ===========================================
+   Mobile Touch Controls
+   =========================================== */
+
+/* Hide toolbar on desktop by default */
+.mobile-toolbar {
+  display: none;
+}
+
+/* Show only on touch devices or small screens */
+@media (pointer: coarse), (max-width: 768px) {
+  .mobile-toolbar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(26, 26, 46, 0.95) 0%, transparent 100%);
+    padding: 1rem 1.5rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    gap: 1rem;
+    z-index: 100;
+    transform: translateY(0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .mobile-toolbar.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+    display: flex !important;
+  }
+
+  #controls-hint {
+    display: none !important;
+  }
+
+  #reader-screen {
+    padding-bottom: 100px;
+  }
+}
+
+/* Toolbar rows */
+.toolbar-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.toolbar-row.secondary {
+  gap: 1.5rem;
+}
+
+/* Toolbar buttons - minimal ghost style */
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--muted-color);
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.toolbar-btn:active {
+  color: var(--accent-color);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Primary action button (play/pause) */
+.toolbar-btn.primary-action {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.toolbar-btn.primary-action:active {
+  opacity: 0.8;
+}
+
+.toolbar-btn.primary-action.playing {
+  background-color: var(--muted-color);
+}
+
+/* Hide labels - icons only */
+.btn-label {
+  display: none;
+}
+
+.btn-icon {
+  line-height: 1;
+}
+
+/* Active state for toggle buttons */
+.toolbar-btn.active {
+  color: var(--accent-color);
+}
