@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RSVP Reader</title>
-  <script type="module" crossorigin src="/readlocally/assets/index-D1g4PYJt.js"></script>
-  <link rel="stylesheet" crossorigin href="/readlocally/assets/index-DmbKZ3P6.css">
+  <script type="module" crossorigin src="/readlocally/assets/index-wrAP2iAj.js"></script>
+  <link rel="stylesheet" crossorigin href="/readlocally/assets/index-SL2iCURX.css">
 </head>
 <body>
   <div id="app">
@@ -58,12 +58,10 @@
     <div id="reader-screen" class="screen hidden">
       <div id="word-display">
         <div id="focus-line"></div>
-        <span id="prev-word" class="peripheral-word"></span>
         <div id="current-word">
           <div id="word-left"><span id="word-before"></span><span id="word-orp"></span></div>
           <div id="word-right"><span id="word-after"></span></div>
         </div>
-        <span id="next-word" class="peripheral-word"></span>
       </div>
 
       <div id="chapter-indicator" class="hidden">
@@ -78,7 +76,7 @@
       </div>
 
       <div id="controls-hint">
-        <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>P</kbd> preview | <kbd>Esc</kbd> menu
+        <kbd>Space</kbd> play/pause | <kbd>↑↓</kbd> speed | <kbd>1-5</kbd> chunks | <kbd>+/-</kbd> size | <kbd>F</kbd> font | <kbd>Esc</kbd> menu
       </div>
 
       <!-- Mobile Touch Controls -->
@@ -97,7 +95,6 @@
           <button class="toolbar-btn" id="btn-font-down" aria-label="Smaller text">A↓</button>
           <button class="toolbar-btn" id="btn-font-up" aria-label="Larger text">A↑</button>
           <button class="toolbar-btn" id="btn-font-cycle" aria-label="Font">Aa</button>
-          <button class="toolbar-btn" id="btn-preview-toggle" aria-label="Preview"><span id="preview-icon">◯</span></button>
           <button class="toolbar-btn" id="btn-menu" aria-label="Menu">✕</button>
         </div>
       </div>
