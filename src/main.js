@@ -135,6 +135,9 @@ const btnChunkCycle = document.getElementById('btn-chunk-cycle');
 const btnFontUp = document.getElementById('btn-font-up');
 const btnFontDown = document.getElementById('btn-font-down');
 const btnFontCycle = document.getElementById('btn-font-cycle');
+const btnPrevChapter = document.getElementById('btn-prev-chapter');
+const btnNextChapter = document.getElementById('btn-next-chapter');
+const btnThemeCycle = document.getElementById('btn-theme-cycle');
 const btnMenu = document.getElementById('btn-menu');
 const playPauseIcon = document.getElementById('play-pause-icon');
 const chunkIcon = document.getElementById('chunk-icon');
@@ -1069,6 +1072,13 @@ function initMobileToolbar() {
 
   // Font cycle
   btnFontCycle?.addEventListener('click', cycleReadingFont);
+
+  // Chapter navigation
+  btnPrevChapter?.addEventListener('click', goToPreviousChapter);
+  btnNextChapter?.addEventListener('click', goToNextChapter);
+
+  // Theme cycle
+  btnThemeCycle?.addEventListener('click', cycleTheme);
 
   // Menu/back button
   btnMenu?.addEventListener('click', () => {
