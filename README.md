@@ -21,12 +21,15 @@ A browser-based EPUB reader using Rapid Serial Visual Presentation (RSVP) for sp
 | 1-5 | Set chunk size (words per display) |
 | +/- | Adjust font size |
 | F | Cycle reading font |
+| T | Cycle theme (dark/light/sepia) |
 | J/K | Step backward/forward (when paused) |
+| [ / ] | Previous/next chapter |
+| C | Open chapter list |
 | Esc | Return to menu |
 
 ### Mobile (Touch)
 - Tap anywhere to show/hide controls
-- Bottom toolbar with play/pause, speed, and settings
+- Bottom toolbar includes: play/pause, speed (±), step controls, chunk size, font controls, theme toggle (T), chapter navigation (‹‹/››), and menu
 
 ## Development
 
