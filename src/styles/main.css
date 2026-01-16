@@ -4,7 +4,6 @@
   --text-color: #eaeaea;
   --accent-color: #e94560;
   --orp-color: #e94560;
-  --peripheral-color: #444;
   --muted-color: #666;
   --surface-color: #16213e;
   --border-color: #0f3460;
@@ -251,33 +250,6 @@ html, body {
   pointer-events: none;
   z-index: 2;
   font-size: var(--font-size-word);
-}
-
-/* Peripheral Preview Words */
-.peripheral-word {
-  position: absolute;
-  font-size: calc(var(--font-size-word) * 0.5);
-  color: var(--peripheral-color);
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  font-family: var(--font-family-reading);
-}
-
-.peripheral-word.visible {
-  opacity: 0.4;
-}
-
-#prev-word {
-  right: calc(50% + 15ch);
-  text-align: right;
-}
-
-#next-word {
-  left: calc(50% + 15ch);
-  text-align: left;
 }
 
 /* Chunk display - multiple words */

@@ -76,7 +76,6 @@ let tokens = null;
 let currentFile = null;
 let currentFileHandle = null;
 let preferences = getPreferences();
-let showPeripheralPreview = preferences.showPeripheralPreview || false;
 let lastPositionSaveTime = 0;
 let mobileControlsInitialized = false;
 
@@ -93,8 +92,6 @@ const wordRightEl = document.getElementById('word-right');
 const wordBeforeEl = document.getElementById('word-before');
 const wordOrpEl = document.getElementById('word-orp');
 const wordAfterEl = document.getElementById('word-after');
-const prevWordEl = document.getElementById('prev-word');
-const nextWordEl = document.getElementById('next-word');
 const statusIndicator = document.getElementById('status-indicator');
 const wpmDisplay = document.getElementById('wpm-display');
 const chunkDisplay = document.getElementById('chunk-display');
@@ -126,11 +123,9 @@ const btnChunkCycle = document.getElementById('btn-chunk-cycle');
 const btnFontUp = document.getElementById('btn-font-up');
 const btnFontDown = document.getElementById('btn-font-down');
 const btnFontCycle = document.getElementById('btn-font-cycle');
-const btnPreviewToggle = document.getElementById('btn-preview-toggle');
 const btnMenu = document.getElementById('btn-menu');
 const playPauseIcon = document.getElementById('play-pause-icon');
 const chunkIcon = document.getElementById('chunk-icon');
-const previewIcon = document.getElementById('preview-icon');
 
 /**
  * Initialize the application
@@ -427,7 +422,6 @@ function startReading() {
 
   updateWpmDisplay(preferences.wpm);
   updateChunkDisplay(preferences.chunkSize || 1);
-  updatePeripheralPreviewVisibility();
   statusIndicator.textContent = 'Paused';
   statusIndicator.classList.remove('playing');
 
@@ -450,12 +444,6 @@ function handleWord(data) {
     displayChunk(chunk);
   } else {
     displaySingleWord(token.word);
-  }
-
-  // Update peripheral preview
-  if (showPeripheralPreview) {
-    prevWordEl.textContent = prevToken?.word || '';
-    nextWordEl.textContent = nextToken?.word || '';
   }
 
   // Show chapter indicator on chapter change
@@ -649,11 +637,6 @@ function handleKeydown(event) {
       }
       break;
 
-    case 'KeyP':
-      event.preventDefault();
-      togglePeripheralPreview();
-      break;
-
     case 'KeyF':
       event.preventDefault();
       cycleReadingFont();
@@ -686,31 +669,6 @@ function handleKeydown(event) {
       engine?.pause();
       showBookInfoScreen();
       break;
-  }
-}
-
-/**
- * Toggle peripheral preview visibility
- */
-function togglePeripheralPreview() {
-  showPeripheralPreview = !showPeripheralPreview;
-  preferences.showPeripheralPreview = showPeripheralPreview;
-  savePreferences({ showPeripheralPreview });
-  updatePeripheralPreviewVisibility();
-}
-
-/**
- * Update peripheral preview DOM visibility
- */
-function updatePeripheralPreviewVisibility() {
-  if (showPeripheralPreview) {
-    prevWordEl.classList.add('visible');
-    nextWordEl.classList.add('visible');
-  } else {
-    prevWordEl.classList.remove('visible');
-    nextWordEl.classList.remove('visible');
-    prevWordEl.textContent = '';
-    nextWordEl.textContent = '';
   }
 }
 
@@ -913,12 +871,6 @@ function initMobileToolbar() {
   // Font cycle
   btnFontCycle?.addEventListener('click', cycleReadingFont);
 
-  // Peripheral preview toggle
-  btnPreviewToggle?.addEventListener('click', () => {
-    togglePeripheralPreview();
-    updatePreviewIcon();
-  });
-
   // Menu/back button
   btnMenu?.addEventListener('click', () => {
     engine?.pause();
@@ -935,21 +887,8 @@ function updateMobileUI() {
   // Update chunk icon
   updateChunkIcon(preferences.chunkSize || 1);
 
-  // Update preview icon
-  updatePreviewIcon();
-
   // Update step button states
   updateStepButtonStates();
-}
-
-/**
- * Update preview icon based on current state
- */
-function updatePreviewIcon() {
-  if (previewIcon) {
-    previewIcon.textContent = showPeripheralPreview ? '◉' : '◯';
-    btnPreviewToggle?.classList.toggle('active', showPeripheralPreview);
-  }
 }
 
 /**
