@@ -476,16 +476,17 @@ function startReading() {
 function handleWord(data) {
   const { token, chunk, prevToken, nextToken, index, chunkSize } = data;
 
+  // Show chapter indicator on chapter change (before displaying word)
+  if (token.isChapterStart && index > 0) {
+    showChapterIndicator(token.chapterTitle);
+    return; // Don't display the word yet - chapter indicator will handle resume
+  }
+
   // Handle chunk display
   if (chunkSize > 1) {
     displayChunk(chunk);
   } else {
     displaySingleWord(token.word);
-  }
-
-  // Show chapter indicator on chapter change
-  if (token.isChapterStart && index > 0) {
-    showChapterIndicator(token.chapterTitle);
   }
 }
 
@@ -523,20 +524,42 @@ function displayChunk(chunk) {
 }
 
 /**
- * Show chapter indicator briefly
+ * Show chapter indicator in center reading area
  * @param {string} title - Chapter title
  */
 function showChapterIndicator(title) {
-  chapterTitle.textContent = title;
-  chapterIndicator.classList.remove('hidden');
+  if (!engine) return;
 
-  chapterIndicator.style.animation = 'none';
-  chapterIndicator.offsetHeight;
-  chapterIndicator.style.animation = '';
+  // Remember if we were playing
+  const wasPlaying = engine.getIsPlaying();
 
+  // Pause the engine
+  if (wasPlaying) {
+    engine.pause();
+  }
+
+  // Display chapter title in center word area
+  currentWordEl.classList.add('chapter-transition');
+  wordBeforeEl.textContent = '';
+  wordOrpEl.textContent = '';
+  wordAfterEl.textContent = title;
+
+  // After 2.5 seconds, resume reading
   setTimeout(() => {
-    chapterIndicator.classList.add('hidden');
-  }, 2000);
+    currentWordEl.classList.remove('chapter-transition');
+
+    // Resume engine if it was playing
+    if (wasPlaying) {
+      engine.play();
+    } else {
+      // If not playing, just show the first word of the chapter
+      const currentIndex = engine.getCurrentIndex();
+      const token = tokens[currentIndex];
+      if (token) {
+        displaySingleWord(token.word);
+      }
+    }
+  }, 2500);
 }
 
 /**

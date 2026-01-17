@@ -188,6 +188,34 @@ html, body {
   color: var(--text-color);
 }
 
+/* Chapter transition mode - display chapter title in center */
+#current-word.chapter-transition {
+  font-size: calc(var(--font-size-word) * 0.6);
+  animation: chapterFadeIn 0.3s ease-in;
+}
+
+#current-word.chapter-transition #word-left {
+  display: none;
+}
+
+#current-word.chapter-transition #word-right {
+  position: static;
+  text-align: center;
+}
+
+#current-word.chapter-transition #word-after {
+  color: var(--accent-color);
+  font-weight: 500;
+  white-space: normal;
+  max-width: 80vw;
+  line-height: 1.4;
+}
+
+@keyframes chapterFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Focus guides - subtle lines marking ORP position */
 /* Focus guides - positioned relative to word-display for proper centering */
 #focus-line {
@@ -453,25 +481,9 @@ kbd {
   color: var(--text-color);
 }
 
-/* Chapter Indicator */
+/* Chapter Indicator (legacy - now displayed in center) */
 #chapter-indicator {
-  position: fixed;
-  top: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem 2rem;
-  background-color: var(--surface-color);
-  border-radius: 8px;
-  font-size: 1.25rem;
-  z-index: 10;
-  animation: fadeInOut 2s ease-in-out forwards;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { opacity: 0; }
+  display: none;
 }
 
 /* Loading State */
