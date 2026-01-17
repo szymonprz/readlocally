@@ -41,6 +41,10 @@ import {
   setPlayingState,
 } from './services/mobile-controls.js';
 import {
+  initFullscreen,
+  setPlayingState as setFullscreenPlayingState,
+} from './services/fullscreen.js';
+import {
   applyTheme,
   getNextThemeId,
   getThemeName,
@@ -138,6 +142,7 @@ const btnFontCycle = document.getElementById('btn-font-cycle');
 const btnPrevChapter = document.getElementById('btn-prev-chapter');
 const btnNextChapter = document.getElementById('btn-next-chapter');
 const btnThemeCycle = document.getElementById('btn-theme-cycle');
+const btnFullscreen = document.getElementById('btn-fullscreen');
 const btnMenu = document.getElementById('btn-menu');
 const playPauseIcon = document.getElementById('play-pause-icon');
 const chunkIcon = document.getElementById('chunk-icon');
@@ -594,6 +599,7 @@ function handleStateChange(isPlaying) {
       if (playPauseIcon) playPauseIcon.textContent = '⏸';
       btnPlayPause?.classList.add('playing');
       setPlayingState(true);
+      setFullscreenPlayingState(true);
       acquireWakeLock();
     }
   } else {
@@ -605,6 +611,7 @@ function handleStateChange(isPlaying) {
       if (playPauseIcon) playPauseIcon.textContent = '▶';
       btnPlayPause?.classList.remove('playing');
       setPlayingState(false);
+      setFullscreenPlayingState(false);
       releaseWakeLock();
     }
 
@@ -1061,6 +1068,13 @@ function initMobileToolbar() {
   initMobileControls({
     toolbar: mobileToolbar,
     reader: readerScreen,
+  });
+
+  // Initialize fullscreen controls
+  initFullscreen({
+    readerElement: readerScreen,
+    fullscreenButton: btnFullscreen,
+    autoEnter: true,
   });
 
   // Setup wake lock visibility handler

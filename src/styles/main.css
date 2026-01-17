@@ -753,3 +753,36 @@ kbd {
   border-color: var(--text-color);
   color: var(--text-color);
 }
+
+/* ===========================================
+   Fullscreen Mode
+   =========================================== */
+
+/* Fullscreen button SVG icons */
+.toolbar-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+/* Fullscreen mode - remove padding to maximize viewport */
+@media (pointer: coarse), (max-width: 768px) {
+  #reader-screen.fullscreen-active {
+    padding-bottom: 0;
+  }
+}
+
+/* Landscape fullscreen mode */
+@media (pointer: coarse) and (orientation: landscape), (max-height: 500px) {
+  #reader-screen.fullscreen-active {
+    padding-bottom: 0;
+  }
+}
+
+/*
+ * Word position stability during fullscreen transitions
+ * The word stays absolutely centered at 50% via existing layout:
+ * - #current-word uses position: absolute + top: 50% + transform: translateY(-50%)
+ * - This ensures the ORP character remains at screen center regardless of padding changes
+ * - No additional CSS needed - the existing layout handles it perfectly
+ */
