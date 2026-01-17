@@ -477,7 +477,8 @@ function handleWord(data) {
   const { token, chunk, prevToken, nextToken, index, chunkSize } = data;
 
   // Show chapter indicator on chapter change (before displaying word)
-  if (token.isChapterStart && index > 0) {
+  // Skip if we're already showing a chapter transition
+  if (token.isChapterStart && index > 0 && !currentWordEl.classList.contains('chapter-transition')) {
     showChapterIndicator(token.chapterTitle);
     return; // Don't display the word yet - chapter indicator will handle resume
   }
@@ -548,16 +549,33 @@ function showChapterIndicator(title) {
   setTimeout(() => {
     currentWordEl.classList.remove('chapter-transition');
 
+    // Display the first word of the chapter
+    const currentIndex = engine.getCurrentIndex();
+    const chunkSize = engine.getChunkSize();
+    const token = tokens[currentIndex];
+
+    if (token) {
+      if (chunkSize > 1) {
+        const chunk = [];
+        for (let i = 0; i < chunkSize && currentIndex + i < tokens.length; i++) {
+          chunk.push(tokens[currentIndex + i]);
+        }
+        displayChunk(chunk);
+      } else {
+        displaySingleWord(token.word);
+      }
+    }
+
+    // Advance to the next word so when engine.play() calls displayCurrentWord(),
+    // it won't trigger the chapter indicator again
+    const nextIndex = currentIndex + chunkSize;
+    if (nextIndex < tokens.length) {
+      engine.seekTo(nextIndex);
+    }
+
     // Resume engine if it was playing
     if (wasPlaying) {
       engine.play();
-    } else {
-      // If not playing, just show the first word of the chapter
-      const currentIndex = engine.getCurrentIndex();
-      const token = tokens[currentIndex];
-      if (token) {
-        displaySingleWord(token.word);
-      }
     }
   }, 2500);
 }
