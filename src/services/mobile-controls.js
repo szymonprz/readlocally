@@ -1,15 +1,13 @@
 /**
  * Mobile Controls Service
- * Manages touch toolbar visibility and auto-hide behavior
+ * Manages toolbar visibility with chevron button
  */
 
-const AUTOHIDE_DELAY = 4000; // 4 seconds
-
-let hideTimer = null;
-let isVisible = true;
-let isPlaying = false;
+let isVisible = false;
 let toolbarEl = null;
 let readerEl = null;
+let chevronBtn = null;
+let onToolbarShowCallback = null;
 
 /**
  * Detect if the device supports touch or is a small screen
@@ -25,12 +23,13 @@ export function isMobileDevice() {
 }
 
 /**
- * Initialize mobile controls with auto-hide behavior
+ * Initialize mobile controls with chevron button
  * @param {Object} options
  * @param {HTMLElement} options.toolbar - The toolbar element
  * @param {HTMLElement} options.reader - The reader screen element
+ * @param {Function} options.onToolbarShow - Callback when toolbar is shown (should pause reading)
  */
-export function initMobileControls({ toolbar, reader }) {
+export function initMobileControls({ toolbar, reader, onToolbarShow }) {
   if (!toolbar || !reader) {
     console.warn('Mobile controls: missing toolbar or reader element');
     return;
@@ -38,62 +37,35 @@ export function initMobileControls({ toolbar, reader }) {
 
   toolbarEl = toolbar;
   readerEl = reader;
+  onToolbarShowCallback = onToolbarShow;
 
-  // Tap anywhere on reader toggles toolbar visibility (except toolbar itself)
-  reader.addEventListener('click', (e) => {
-    if (toolbar.contains(e.target)) {
-      return;
-    }
+  // Create chevron button
+  createChevronButton();
+
+  // Initial state: toolbar hidden
+  hideToolbar();
+}
+
+/**
+ * Create the chevron toggle button
+ */
+function createChevronButton() {
+  if (chevronBtn) return; // Already created
+
+  chevronBtn = document.createElement('button');
+  chevronBtn.id = 'toolbar-chevron';
+  chevronBtn.className = 'toolbar-chevron';
+  chevronBtn.setAttribute('aria-label', 'Toggle toolbar');
+  chevronBtn.innerHTML = '⌃'; // Chevron up by default
+
+  // Add to reader screen
+  readerEl.appendChild(chevronBtn);
+
+  // Click handler
+  chevronBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent tap controls from triggering
     toggleVisibility();
   });
-
-  // Keep toolbar visible while interacting with it
-  toolbar.addEventListener('touchstart', () => {
-    clearAutoHideTimer();
-  }, { passive: true });
-
-  toolbar.addEventListener('touchend', () => {
-    if (isPlaying) {
-      startAutoHideTimer();
-    }
-  }, { passive: true });
-
-  // Initial state
-  showToolbar();
-}
-
-/**
- * Update the playing state and manage toolbar visibility accordingly
- * @param {boolean} playing - Whether playback is active
- */
-export function setPlayingState(playing) {
-  isPlaying = playing;
-  if (playing) {
-    startAutoHideTimer();
-  } else {
-    clearAutoHideTimer();
-    showToolbar();
-  }
-}
-
-/**
- * Start the auto-hide timer
- */
-function startAutoHideTimer() {
-  clearAutoHideTimer();
-  hideTimer = setTimeout(() => {
-    hideToolbar();
-  }, AUTOHIDE_DELAY);
-}
-
-/**
- * Clear the auto-hide timer
- */
-function clearAutoHideTimer() {
-  if (hideTimer) {
-    clearTimeout(hideTimer);
-    hideTimer = null;
-  }
 }
 
 /**
@@ -103,16 +75,35 @@ function showToolbar() {
   if (toolbarEl) {
     toolbarEl.classList.remove('hidden');
     isVisible = true;
+
+    // Update chevron to down arrow
+    if (chevronBtn) {
+      chevronBtn.innerHTML = '⌄';
+      chevronBtn.setAttribute('aria-label', 'Hide toolbar');
+    }
+
+    // Trigger pause callback
+    if (onToolbarShowCallback) {
+      onToolbarShowCallback();
+    }
   }
 }
 
 /**
- * Hide the toolbar (only if playing)
+ * Hide the toolbar
  */
 function hideToolbar() {
-  if (toolbarEl && isPlaying) {
+  if (toolbarEl) {
     toolbarEl.classList.add('hidden');
     isVisible = false;
+
+    // Update chevron to up arrow
+    if (chevronBtn) {
+      chevronBtn.innerHTML = '⌃';
+      chevronBtn.setAttribute('aria-label', 'Show toolbar');
+    }
+
+    // Note: We do NOT auto-play when hiding
   }
 }
 
@@ -124,9 +115,6 @@ function toggleVisibility() {
     hideToolbar();
   } else {
     showToolbar();
-    if (isPlaying) {
-      startAutoHideTimer();
-    }
   }
 }
 
@@ -139,12 +127,30 @@ export function isToolbarVisible() {
 }
 
 /**
- * Clean up event listeners and timers
+ * Programmatically show toolbar (for external use)
+ */
+export function show() {
+  showToolbar();
+}
+
+/**
+ * Programmatically hide toolbar (for external use)
+ */
+export function hide() {
+  hideToolbar();
+}
+
+/**
+ * Clean up event listeners and elements
  */
 export function destroy() {
-  clearAutoHideTimer();
+  if (chevronBtn && chevronBtn.parentNode) {
+    chevronBtn.parentNode.removeChild(chevronBtn);
+  }
+
+  chevronBtn = null;
   toolbarEl = null;
   readerEl = null;
-  isVisible = true;
-  isPlaying = false;
+  onToolbarShowCallback = null;
+  isVisible = false;
 }

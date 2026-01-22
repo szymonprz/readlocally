@@ -38,7 +38,6 @@ import {
 import {
   isMobileDevice,
   initMobileControls,
-  setPlayingState,
 } from './services/mobile-controls.js';
 import {
   initFullscreen,
@@ -49,6 +48,7 @@ import {
   getNextThemeId,
   getThemeName,
 } from './services/theme.js';
+import { TapControls } from './services/tap-controls.js';
 
 // Font configuration - open source fonts optimized for reading (self-hosted via Fontsource)
 const READING_FONTS = {
@@ -89,6 +89,7 @@ let preferences = getPreferences();
 let lastPositionSaveTime = 0;
 let mobileControlsInitialized = false;
 let isResumingBook = false; // Track if we're resuming a previous book
+let tapControls = null; // Tap controls for YouTube-style interactions
 
 // DOM Elements
 const landingScreen = document.getElementById('landing-screen');
@@ -469,6 +470,9 @@ function startReading() {
 
   showReaderScreen();
 
+  // Initialize tap controls for all devices (mobile and desktop)
+  initTapControls();
+
   // Initialize mobile controls when entering reader
   initMobileToolbar();
   updateMobileUI();
@@ -602,6 +606,11 @@ function handleStateChange(isPlaying) {
       setFullscreenPlayingState(true);
       acquireWakeLock();
     }
+
+    // Show tap control visual feedback
+    if (tapControls) {
+      tapControls.updatePlayPauseState(true);
+    }
   } else {
     statusIndicator.textContent = 'Paused';
     statusIndicator.classList.remove('playing');
@@ -613,6 +622,11 @@ function handleStateChange(isPlaying) {
       setPlayingState(false);
       setFullscreenPlayingState(false);
       releaseWakeLock();
+    }
+
+    // Show tap control visual feedback
+    if (tapControls) {
+      tapControls.updatePlayPauseState(false);
     }
 
     // Update step button states (only enabled when paused)
@@ -882,6 +896,28 @@ function stepForward() {
 }
 
 /**
+ * Skip backward by 25 words
+ */
+function skipBackward() {
+  if (!engine) return;
+
+  const currentIndex = engine.getCurrentIndex();
+  const newIndex = Math.max(0, currentIndex - 25);
+  engine.seekTo(newIndex);
+}
+
+/**
+ * Skip forward by 25 words
+ */
+function skipForward() {
+  if (!engine) return;
+
+  const currentIndex = engine.getCurrentIndex();
+  const newIndex = Math.min(tokens.length - 1, currentIndex + 25);
+  engine.seekTo(newIndex);
+}
+
+/**
  * Show a temporary notification (reuses chapter indicator)
  * @param {string} message - Message to display
  */
@@ -1057,6 +1093,27 @@ function toggleChapterListOverlay() {
 }
 
 /**
+ * Initialize tap controls for all devices (mobile and desktop)
+ */
+function initTapControls() {
+  if (tapControls) return; // Already initialized
+
+  tapControls = new TapControls();
+  const wordDisplay = document.getElementById('word-display');
+  tapControls.init(wordDisplay, {
+    onPlayPause: () => {
+      engine?.toggle();
+    },
+    onSkipBack: () => {
+      skipBackward();
+    },
+    onSkipForward: () => {
+      skipForward();
+    },
+  });
+}
+
+/**
  * Initialize mobile toolbar controls
  */
 function initMobileToolbar() {
@@ -1064,10 +1121,16 @@ function initMobileToolbar() {
 
   mobileControlsInitialized = true;
 
-  // Initialize visibility management
+  // Initialize visibility management with pause callback
   initMobileControls({
     toolbar: mobileToolbar,
     reader: readerScreen,
+    onToolbarShow: () => {
+      // Pause reading when toolbar is shown
+      if (engine && engine.getIsPlaying()) {
+        engine.pause();
+      }
+    },
   });
 
   // Initialize fullscreen controls

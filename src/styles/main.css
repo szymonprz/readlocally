@@ -793,3 +793,183 @@ kbd {
  * - This ensures the ORP character remains at screen center regardless of padding changes
  * - No additional CSS needed - the existing layout handles it perfectly
  */
+
+/* ===========================================
+   Tap Controls - YouTube-style Feedback
+   =========================================== */
+
+/* Base feedback overlay styling */
+.tap-feedback {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 9998; /* Below toolbar (9999) but above word display */
+  user-select: none;
+}
+
+.tap-feedback .feedback-icon {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tap-feedback .feedback-icon svg {
+  width: 40px;
+  height: 40px;
+  stroke: rgba(255, 255, 255, 0.95);
+  fill: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Play/Pause feedback - top-right corner */
+#tap-feedback-playpause {
+  top: 20px;
+  right: 20px;
+}
+
+/* Back arrows feedback - left side of reading area */
+#tap-feedback-back {
+  left: 15%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Forward arrows feedback - right side of reading area */
+#tap-feedback-forward {
+  right: 15%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Show animation */
+.tap-feedback-show {
+  animation: tapFeedbackShow 1.4s ease-out forwards;
+}
+
+@keyframes tapFeedbackShow {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+}
+
+/* Special animation for play/pause (no vertical transform) */
+#tap-feedback-playpause.tap-feedback-show {
+  animation: tapFeedbackShowTopRight 1.4s ease-out forwards;
+}
+
+@keyframes tapFeedbackShowTopRight {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* ===========================================
+   Chevron Button
+   =========================================== */
+
+.toolbar-chevron {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10000; /* Above everything */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toolbar-chevron:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.toolbar-chevron:active {
+  transform: scale(0.95);
+}
+
+/* Prevent text selection on tap controls */
+#word-display {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Mobile-specific adjustments */
+@media (pointer: coarse), (max-width: 768px) {
+  /* Slightly larger tap feedback on mobile */
+  .tap-feedback .feedback-icon {
+    width: 90px;
+    height: 90px;
+  }
+
+  .tap-feedback .feedback-icon svg {
+    width: 45px;
+    height: 45px;
+  }
+
+  /* Adjust positioning for smaller screens */
+  #tap-feedback-back {
+    left: 10%;
+  }
+
+  #tap-feedback-forward {
+    right: 10%;
+  }
+
+  #tap-feedback-playpause {
+    top: 15px;
+    right: 15px;
+  }
+
+  .toolbar-chevron {
+    bottom: 15px;
+    right: 15px;
+  }
+}
