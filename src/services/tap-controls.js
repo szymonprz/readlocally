@@ -120,10 +120,8 @@ export class TapControls {
     // Mouse events (for desktop support)
     this.targetElement.addEventListener('click', this.handleTap.bind(this));
 
-    // Prevent text selection on double-tap
-    this.targetElement.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-    }, { passive: false });
+    // Note: Text selection is prevented via CSS (user-select: none)
+    // We don't need to preventDefault on touchstart
   }
 
   /**

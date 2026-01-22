@@ -76,10 +76,11 @@ function showToolbar() {
     toolbarEl.classList.remove('hidden');
     isVisible = true;
 
-    // Update chevron to down arrow
+    // Update chevron to down arrow and add toolbar-visible class
     if (chevronBtn) {
       chevronBtn.innerHTML = '⌄';
       chevronBtn.setAttribute('aria-label', 'Hide toolbar');
+      chevronBtn.classList.add('toolbar-visible');
     }
 
     // Trigger pause callback
@@ -97,10 +98,11 @@ function hideToolbar() {
     toolbarEl.classList.add('hidden');
     isVisible = false;
 
-    // Update chevron to up arrow
+    // Update chevron to up arrow and remove toolbar-visible class
     if (chevronBtn) {
       chevronBtn.innerHTML = '⌃';
       chevronBtn.setAttribute('aria-label', 'Show toolbar');
+      chevronBtn.classList.remove('toolbar-visible');
     }
 
     // Note: We do NOT auto-play when hiding

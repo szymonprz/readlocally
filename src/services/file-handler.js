@@ -54,7 +54,9 @@ export function initFileHandler({
   onError,
 }) {
   // File picker button click - try FSAA first, fallback to traditional input
-  pickerButton.addEventListener('click', async () => {
+  pickerButton.addEventListener('click', async (e) => {
+    e.stopPropagation(); // Prevent event from bubbling to dropZone
+
     if ('showOpenFilePicker' in window && onFileWithHandle) {
       try {
         const result = await openFilePicker();
@@ -113,11 +115,29 @@ export function initFileHandler({
   });
 
   // Click on drop zone also opens file picker
-  dropZone.addEventListener('click', (e) => {
+  dropZone.addEventListener('click', async (e) => {
     // Don't trigger if clicking the button itself
-    if (e.target !== pickerButton) {
-      fileInput.click();
+    if (e.target === pickerButton || pickerButton.contains(e.target)) {
+      return;
     }
+
+    // Try FSAA first, fallback to traditional input
+    if ('showOpenFilePicker' in window && onFileWithHandle) {
+      try {
+        const result = await openFilePicker();
+        if (result) {
+          handleFile(result.file, onFile, onError, onFileWithHandle, result.handle);
+          return;
+        }
+        // User cancelled, do nothing
+        return;
+      } catch (error) {
+        console.warn('FSAA picker failed, falling back:', error);
+      }
+    }
+
+    // Fallback to traditional file input
+    fileInput.click();
   });
 }
 

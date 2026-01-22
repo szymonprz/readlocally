@@ -602,7 +602,6 @@ function handleStateChange(isPlaying) {
     if (isMobileDevice()) {
       if (playPauseIcon) playPauseIcon.textContent = '⏸';
       btnPlayPause?.classList.add('playing');
-      setPlayingState(true);
       setFullscreenPlayingState(true);
       acquireWakeLock();
     }
@@ -619,7 +618,6 @@ function handleStateChange(isPlaying) {
     if (isMobileDevice()) {
       if (playPauseIcon) playPauseIcon.textContent = '▶';
       btnPlayPause?.classList.remove('playing');
-      setPlayingState(false);
       setFullscreenPlayingState(false);
       releaseWakeLock();
     }

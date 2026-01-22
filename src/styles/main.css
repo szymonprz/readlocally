@@ -595,6 +595,11 @@ kbd {
   #reader-screen {
     padding-bottom: 60px;
   }
+
+  /* Chevron positioning in landscape */
+  .toolbar-chevron.toolbar-visible {
+    bottom: 130px; /* Smaller toolbar height in landscape */
+  }
 }
 
 /* Toolbar rows */
@@ -917,10 +922,15 @@ kbd {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: bottom 0.3s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   z-index: 10000; /* Above everything */
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* When toolbar is visible, position chevron above it */
+.toolbar-chevron.toolbar-visible {
+  bottom: 180px; /* Adjust based on toolbar height */
 }
 
 .toolbar-chevron:hover {
@@ -932,6 +942,11 @@ kbd {
 
 .toolbar-chevron:active {
   transform: scale(0.95);
+}
+
+/* Hover transform for toolbar-visible state */
+.toolbar-chevron.toolbar-visible:hover {
+  transform: scale(1.05);
 }
 
 /* Prevent text selection on tap controls */
@@ -971,5 +986,10 @@ kbd {
   .toolbar-chevron {
     bottom: 15px;
     right: 15px;
+  }
+
+  /* When toolbar is visible on mobile */
+  .toolbar-chevron.toolbar-visible {
+    bottom: 170px; /* Slightly adjusted for mobile */
   }
 }
